@@ -1,0 +1,143 @@
+---
+title: "Shiny App documentation for Storm Data Analysis"
+author: "Sathish Duraisamy"
+date: "January 24, 2015"
+output: html_document
+runtime: shiny
+---
+
+## Introduction
+This R Markdown document explains about the Shiny App created for
+viewing the analysis done on US National Ocean And Atmospheric Administration
+[NOAA](http://www.noaa.gov) Storm database. This database documents the weather/storm events
+happened in US during the years 1950-2011. This app uses a filtered extract
+of that data and answers the questions such as:
+Which weather events caused the most damage to Human Life/Injuries?
+Which weather events caused the most damage to Property and Crops in US?
+
+
+## Inputs and Outputs
+This app lets the user select the type of damage s/he wants to see. And also
+select the Top-N records of that data to be displayed in tabular form. The N
+choices are 5, 10 and 15.
+
+Output will be a plot of Damage (log scale) to the Event Type (y-axis) and 
+a table display of the top-N severe events.
+
+
+```{r, echo=FALSE}
+library(dplyr)
+library(shiny)
+library(reshape2)
+library(ggplot2)
+library(scales)
+
+
+pageWithSidebar(
+    headerPanel("Impact of Storm Events on Humans/Propery in US for years 1950-2011"),
+
+    sidebarPanel(
+        radioButtons(inputId='impact_on', label = h3('Select the Impact on:'),
+                     choices = c("Human Life/Injury" = 1, "Property/Crops" = 2),
+                     selected = 1),
+        numericInput(inputId="top_n", label='Display top N severe events:',
+                     value=5, min=5, max=15, step=5),
+        submitButton(text = "Go")
+    ),
+    mainPanel(
+        p("Note: The Storm/Weather data used in this app is a filtered extract of much
+           detailed dataset obtained from U.S. National Oceanic and Atmospheric
+          Administration ", a("(NOAA)", href="http://www.noaa.gov/"),
+                " storm database"),
+        br(),
+        fluidRow(
+            plotOutput('plot')
+        ),
+        fluidRow(
+            br(), hr(),
+            h2(textOutput("top_n_txt")),
+            tableOutput('top_n_events')
+        )
+    )
+)
+
+   plot_damage <- reactive({
+        df <- read.csv("storm_data_analysis_short.csv", header=TRUE)
+
+        if (input$impact_on == 1) {
+            dfh <- df %>%
+                filter(tot_fatal > 0 | tot_injur > 0) %>%
+                arrange(tot_fatal)
+            y_scale <- seq_along(1:NROW(dfh))
+            dfh <- dfh %>% mutate(evtype_f = factor(y_scale, levels=y_scale, labels=evtype))
+
+            dfh # This is the final contents of our Tidy data, just before plotting
+
+            # Melt a 3 column dataset into a 2 column dataset for easy
+            # two series-of-points plotting in the same plot
+            df2 <- melt(dfh[,c("evtype_f", "tot_fatal", "tot_injur")], id="evtype_f")
+            df2$variable <- gsub("tot_fatal", "Fatalities", df2$variable)
+            df2$variable <- gsub("tot_injur", "Injuries", df2$variable)
+
+            plot <- ggplot(df2,
+                           aes(y=evtype_f, x=log(value), colour=variable, size=value)) +
+                geom_point(shape=20) +
+                scale_size_continuous(range = c(4,15)) +
+                ylab("Event Type") +
+                xlab("Health Impact (Fatalities/Injuries) in log scale") +
+                ggtitle("Storm Events impact on US Population Health for 1950-2011")
+
+            top_n_events <- head(arrange(dfh, -tot_fatal)[,c(1,2,3)], input$top_n)
+            names(top_n_events) <- c("EventType", "TotalDeathCount", "TotalInjuryCount")
+            return(list(plot, top_n_events))
+        } else {
+            dfp <- df %>%
+                filter(complete.cases(evtype, tot_propdmg, tot_cropdmg) &
+                           tot_propdmg > 0 | tot_cropdmg > 0) %>%
+                arrange(tot_propdmg)
+            y_scale <- seq_along(1:NROW(dfp))
+            dfp <- dfp %>% mutate(evtype_f = factor(y_scale, levels=y_scale, labels=evtype))
+
+            dfp # This is the final contents of our Tidy data, just before plotting
+
+            # Melt a 3 column dataset into a 2 column dataset for easy
+            # two series-of-points plotting in the same plot
+            df2 <- melt(dfp[,c("evtype_f", "tot_cropdmg", "tot_propdmg")], id="evtype_f")
+            df2$variable <- gsub("tot_cropdmg", "Crops", df2$variable)
+            df2$variable <- gsub("tot_propdmg", "Properties", df2$variable)
+
+            plot <- ggplot(df2, aes(y=evtype_f, x=log(value), colour=variable, size=value)) +
+                geom_point(shape=20) +
+                scale_size_continuous(range = c(4,15), labels=comma) +
+                ylab("Event Type") +
+                xlab("Financial Impact (Crops/Property damages) in log scale") +
+                ggtitle("Storm events impact on US Properties/Crops for 1950-2011")
+
+            top_n_events <- head(arrange(dfp, -tot_propdmg)[,c(1,4,5)], input$top_n)
+            names(top_n_events) <- c("EventType", "TotalPropertyDamage", "TotalCropDamage")
+            return(list(plot, top_n_events))
+        }
+    });
+
+
+    output$plot <- renderPlot({
+        results <- plot_damage()
+        pl <- results[[1]]
+        print(pl)
+    });
+
+    output$top_n_events <- renderTable({
+        results <- plot_damage()
+        top_n_events <- results[[2]]
+        top_n_events
+    });
+
+    output$top_n_txt <- renderText({
+        paste("Top ", input$top_n, " most severe events are: ", sep="")
+    })
+
+
+```
+
+
+--end--
