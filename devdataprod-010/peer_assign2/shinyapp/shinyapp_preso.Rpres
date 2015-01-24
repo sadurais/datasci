@@ -1,0 +1,106 @@
+Shiny App for US Storm Data Analysis
+========================================================
+author: Sathish Duraisamy
+date: 2015JAN24
+
+Shiny App for Storm Data Analysis
+========================================================
+
+Introduction
+Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
+
+- This Shiny App explores the US National Storm Data
+- Lets the user choose the different impact targets
+- And displays graph decpicting the most severe weather events
+
+Data Processing
+========================================================
+This app uses a filtered extract of the detailed dataset
+from US NOAA (National Oceanic and Atmospheric Administration)
+
+```{r}
+df <- read.csv("storm_data_analysis_short.csv", header=TRUE)
+head(df, 4)
+```
+
+Output - Storm events causing Fatalities/Injuries (Plot)
+========================================================
+This is the plot of Strom events impact on Human Life/Injuries
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(scales)
+library(reshape2)
+library(dplyr)
+
+dfh <- df %>%
+    filter(tot_fatal > 0 | tot_injur > 0) %>%
+    arrange(tot_fatal)
+y_scale <- seq_along(1:NROW(dfh))
+dfh <- dfh %>% mutate(evtype_f = factor(y_scale, levels=y_scale, labels=evtype))
+
+# Melt a 3 column dataset into a 2 column dataset for easy
+# two series-of-points plotting in the same plot
+df2 <- melt(dfh[,c("evtype_f", "tot_fatal", "tot_injur")], id="evtype_f")
+df2$variable <- gsub("tot_fatal", "Fatalities", df2$variable)
+df2$variable <- gsub("tot_injur", "Injuries", df2$variable)
+
+plot <- ggplot(df2,
+               aes(y=evtype_f, x=log(value), colour=variable, size=value)) +
+    geom_point(shape=20) +
+    scale_size_continuous(range = c(4,15)) +
+    ylab("Event Type") +
+    xlab("Health Impact (Fatalities/Injuries) in log scale") +
+    ggtitle("Storm Events impact on US Population Health for 1950-2011")
+print(plot)
+
+```
+
+Output - Top 5 most severe Storm events causing Fatalities/Injuries (Text)
+========================================================
+```{r}
+top_n_events <- head(arrange(dfh, -tot_fatal)[,c(1,2,3)], 5)
+names(top_n_events) <- c("EventType", "TotalDeathCount", "TotalInjuryCount")
+top_n_events
+```
+
+Output - Storm events damaging Properties/Crops (Plot)
+========================================================
+This is the plot of Strom events impact on Human Life/Injuries
+```{r, echo=FALSE}
+library(ggplot2)
+library(scales)
+library(reshape2)
+library(dplyr)
+
+dfp <- df %>%
+    filter(complete.cases(evtype, tot_propdmg, tot_cropdmg) &
+               tot_propdmg > 0 | tot_cropdmg > 0) %>%
+    arrange(tot_propdmg)
+y_scale <- seq_along(1:NROW(dfp))
+dfp <- dfp %>% mutate(evtype_f = factor(y_scale, levels=y_scale, labels=evtype))
+
+# Melt a 3 column dataset into a 2 column dataset for easy
+# two series-of-points plotting in the same plot
+df2 <- melt(dfp[,c("evtype_f", "tot_cropdmg", "tot_propdmg")], id="evtype_f")
+df2$variable <- gsub("tot_cropdmg", "Crops", df2$variable)
+df2$variable <- gsub("tot_propdmg", "Properties", df2$variable)
+
+plot <- ggplot(df2, aes(y=evtype_f, x=log(value), colour=variable, size=value)) +
+    geom_point(shape=20) +
+    scale_size_continuous(range = c(4,15), labels=comma) +
+    ylab("Event Type") +
+    xlab("Financial Impact (Crops/Property damages) in log scale") +
+    ggtitle("Storm events impact on US Properties/Crops for 1950-2011")
+print(plot)
+
+```
+
+
+Output - Storm events damaging Properties/Crops (Text)
+========================================================
+```{r}
+top_n_events <- head(arrange(dfp, -tot_propdmg)[,c(1,4,5)], 5)
+names(top_n_events) <- c("EventType", "TotalPropertyDamage", "TotalCropDamage")
+top_n_events
+```
