@@ -2,7 +2,7 @@
 title: "Analysis of mtcars dataset to infer the relationship mpg ~ transmission"
 author: "Sathish Duraisamy"
 date: "January 24, 2015"
-output: pdf_document
+output: html_document
 ---
 
 # Context:
