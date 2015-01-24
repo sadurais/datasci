@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Introduction</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h2>Introduction</h2>
+
+<p>This R Markdown document explains about the Shiny App created for
+viewing the analysis done on US National Ocean And Atmospheric Administration
+<a href="http://www.noaa.gov">NOAA</a> Storm database. This database documents the weather/storm events
+happened in US during the years 1950-2011. This app uses a filtered extract
+of that data and answers the questions such as:
+Which weather events caused the most damage to Human Life/Injuries?
+Which weather events caused the most damage to Property and Crops in US?</p>
+
+<h2>Inputs and Outputs</h2>
+
+<p>This app lets the user select the type of damage s/he wants to see. And also
+select the Top-N records of that data to be displayed in tabular form. The N
+choices are 5, 10 and 15.</p>
+
+<p>Output will be a plot of Damage (log scale) to the Event Type (y-axis) and 
+a table display of the top-N severe events.</p>
+
+<p>&lt;!&ndash;html_preserve&ndash;&gt;<div class="container-fluid"></p>
+
+<div class="row">
+<div class="col-sm-12">
+<h1>Impact of Storm Events on Humans/Propery in US for years 1950-2011</h1>
+</div>
+
+<p></div></p>
+
+<div class="row">
+<div class="col-sm-4">
+<form class="well">
+<div id="impact_on" class="form-group shiny-input-radiogroup shiny-input-container">
+<label class="control-label" for="impact_on">
+<h3>Select the Impact on:</h3>
+</label>
+<div class="shiny-options-group">
+<div class="radio">
+<label>
+<input type="radio" name="impact_on" id="impact_on1" value="1" checked="checked"/>
+<span>Human Life/Injury</span>
+</label>
+</div>
+
+<div class="radio">
+<label>
+<input type="radio" name="impact_on" id="impact_on2" value="2"/>
+<span>Property/Crops</span>
+</label>
+</div>
+
+<p></div>
+</div></p>
+
+<div class="form-group shiny-input-container">
+<label for="top_n">Display top N severe events:</label>
+<input id="top_n" type="number" class="form-control" value="5" min="5" max="15" step="5"/>
+</div>
+
+<div>
+<button type="submit" class="btn btn-primary">Go</button>
+</div>
+
+<p></form>
+</div></p>
+
+<div class="col-sm-8">
+<p>
+Note: The Storm/Weather data used in this app is a filtered extract of much
+           detailed dataset obtained from U.S. National Oceanic and Atmospheric
+          Administration 
+<a href="http://www.noaa.gov/">(NOAA)</a>
+ storm database
+</p>
+<br/>
+<div class="row">
+<div id="plot" class="shiny-plot-output" style="width: 100% ; height: 400px"></div>
+</div>
+
+<div class="row">
+<br/>
+<hr/>
+<h2>
+<div id="top_n_txt" class="shiny-text-output"></div>
+</h2>
+<div id="top_n_events" class="shiny-html-output"></div>
+</div>
+
+<p></div>
+</div>
+</div>&lt;!&ndash;/html_preserve&ndash;&gt;</p>
+
+<pre><code>## Error in output$plot &lt;- renderPlot({: object &#39;output&#39; not found
+</code></pre>
+
+<pre><code>## Error in output$top_n_events &lt;- renderTable({: object &#39;output&#39; not found
+</code></pre>
+
+<pre><code>## Error in output$top_n_txt &lt;- renderText({: object &#39;output&#39; not found
+</code></pre>
+
+<p>&ndash;end&ndash;</p>
+
+</body>
+
+</html>

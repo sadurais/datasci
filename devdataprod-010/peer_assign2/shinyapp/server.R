@@ -2,6 +2,7 @@ library(shiny)
 library(dplyr)
 library(reshape2)
 library(ggplot2)
+library(scales)
 
 #
 # Title: Shiny Application to display the Storm Data Impact on US Population/Property 1950-2011
