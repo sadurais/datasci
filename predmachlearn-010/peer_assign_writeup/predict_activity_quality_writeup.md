@@ -93,6 +93,8 @@ better choice for this prediction.
 
 ```r
 require(caret)
+# Set the seed for reproducible random sampling
+set.seed(121212)
 inTrain2 <- createDataPartition(y=training$classe, p=0.70, list=FALSE)
 train2 <- training[inTrain2, ];  test2 <- training[-inTrain2, ]
 
@@ -154,14 +156,17 @@ cmat <- confusionMatrix(pred_rf, test2$class); cmat
 ## Detection Prevalence   0.2846   0.1935   0.1760   0.1623   0.1835
 ## Balanced Accuracy      0.9986   0.9973   0.9960   0.9929   0.9991
 ```
-We see that we've got an Accuracy of 0.997 and a Confidence Interval of 
-(0.9954, 0.9983)! Since our test-cases are very small (20 observations) 
-it is very very likely that we will get 100% correct answers for them. 
+From the confusion-matrix output, we see that we've got an Accuracy of 
+99.52% (0.9952) and 95% t-confidence interval of (0.9931, 0.9968)! 
+Since our test-cases are very small (20 observations) it is *very very likely*
+that we will get 100% correct answers for them.
 
 Finally, lets make a randomForest model fit and predict for the 20 test-cases.
 
 ```r
 require(randomForest)
+# Set the seed for reproducible random sampling
+set.seed(121212)
 fit <- randomForest(classe ~ ., data=training, na.action=na.fail)
 fit
 ```
@@ -174,14 +179,14 @@ fit
 ##                      Number of trees: 500
 ## No. of variables tried at each split: 7
 ## 
-##         OOB estimate of  error rate: 0.29%
+##         OOB estimate of  error rate: 0.3%
 ## Confusion matrix:
 ##      A    B    C    D    E  class.error
-## A 5577    2    0    0    1 0.0005376344
-## B   11 3782    4    0    0 0.0039504872
-## C    0   11 3409    2    0 0.0037989480
-## D    0    0   21 3194    1 0.0068407960
-## E    0    0    0    4 3603 0.0011089548
+## A 5579    1    0    0    0 0.0001792115
+## B   10 3783    4    0    0 0.0036871214
+## C    0   14 3407    1    0 0.0043834015
+## D    0    0   19 3195    2 0.0065298507
+## E    0    0    2    6 3599 0.0022179096
 ```
 
 ```r
@@ -202,6 +207,6 @@ answers <- as.vector(p); answers
 
 # Summary
 RandomForest seems to be working pretty well for this dataset and predicting task.
-As can be seen from the output of 'fit', the OOB error rate is 0.06% which is 
+As can be seen from the output of 'fit', the OOB error rate is 0.3% which is 
 pretty good. *The answers received were verified to be correct during the 
 Coursera Assignment submission*.

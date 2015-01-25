@@ -69,6 +69,8 @@ We will use randomForest and confusionMatrix to see if randomForest is a
 better choice for this prediction. 
 ```{r cache=FALSE}
 require(caret)
+# Set the seed for reproducible random sampling
+set.seed(121212)
 inTrain2 <- createDataPartition(y=training$classe, p=0.70, list=FALSE)
 train2 <- training[inTrain2, ];  test2 <- training[-inTrain2, ]
 
@@ -86,13 +88,16 @@ data.
 ```{r}
 cmat <- confusionMatrix(pred_rf, test2$class); cmat
 ```
-We see that we've got an Accuracy of 0.997 and a Confidence Interval of 
-(0.9954, 0.9983)! Since our test-cases are very small (20 observations) 
-it is very very likely that we will get 100% correct answers for them. 
+From the confusion-matrix output, we see that we've got an Accuracy of 
+99.52% (0.9952) and 95% t-confidence interval of (0.9931, 0.9968)! 
+Since our test-cases are very small (20 observations) it is *very very likely*
+that we will get 100% correct answers for them.
 
 Finally, lets make a randomForest model fit and predict for the 20 test-cases.
 ```{r cache=FALSE}
 require(randomForest)
+# Set the seed for reproducible random sampling
+set.seed(121212)
 fit <- randomForest(classe ~ ., data=training, na.action=na.fail)
 fit
 plot(fit)
@@ -102,6 +107,6 @@ answers <- as.vector(p); answers
 
 # Summary
 RandomForest seems to be working pretty well for this dataset and predicting task.
-As can be seen from the output of 'fit', the OOB error rate is 0.06% which is 
+As can be seen from the output of 'fit', the OOB error rate is 0.3% which is 
 pretty good. *The answers received were verified to be correct during the 
 Coursera Assignment submission*.

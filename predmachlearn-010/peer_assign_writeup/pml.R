@@ -28,8 +28,6 @@ testing <- read.csv("pml-testing.csv", header=TRUE, sep=",", comment.char = "")
 dim(training)
 dim(testing)
 
-# Set the seed for reproducible random sampling
-set.seed(121212)
 
 # Remove the first 7 columns and columns with NA values
 # that are not useful for prediction
@@ -59,12 +57,17 @@ testing$classe <- as.factor(testing$classe)
 
 
 
+# See if randomForest works well, by subsetting training into sub{train, test}
+# sets and with a confusion-matrix
 require(caret)
+# Set the seed for reproducible random sampling
+set.seed(121212)
 inTrain2 <- createDataPartition(y=training$classe, p=0.70, list=FALSE)
 train2 <- training[inTrain2, ];  test2 <- training[-inTrain2, ]
 
 # We use method 'classification' as classe can have 5 different discrete values
 fit_rf <- randomForest(classe ~ ., data=train2, method="class")
+fit_rf
 plot(fit_rf, log="y")
 
 pred_rf <- predict(fit_rf, newdata = test2, type="class")
@@ -72,7 +75,11 @@ summary(pred_rf)
 
 cmat <- confusionMatrix(pred_rf, test2$class); cmat
 
+
+
 require(randomForest)
+# Set the seed for reproducible random sampling
+set.seed(121212)
 fit <- randomForest(classe ~ ., data=training, na.action=na.fail)
 fit
 plot(fit)
